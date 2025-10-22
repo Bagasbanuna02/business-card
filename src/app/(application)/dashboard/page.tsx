@@ -14,11 +14,12 @@ import {
   Paper,
   Stack,
   Text,
-  Title
+  Title,
 } from "@mantine/core";
 import { IconEye, IconLogout } from "@tabler/icons-react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Profile {
   id: string;
@@ -33,6 +34,16 @@ interface Profile {
 }
 
 export default function DashboardPage() {
+  const { status } = useSession();
+  const router = useRouter();
+  console.log("[STATUS SESSION]", status);
+
+  // useEffect(() => {
+  //   if (status === "unauthenticated") {
+  //     router.push("/auth/signin");
+  //   }
+  // }, [status]);
+
   const mockSession = {
     user: {
       id: "mock-user-id",
@@ -40,8 +51,6 @@ export default function DashboardPage() {
       email: "john@example.com",
     },
   };
-
-  const router = useRouter();
 
   const [profile, setProfile] = useState<Profile>({
     id: "mock-profile-id",
@@ -113,7 +122,6 @@ export default function DashboardPage() {
       }/p/${profile.id}`
     : "";
 
-
   return (
     <Container size="lg" py="xl">
       <Stack gap="lg">
@@ -137,9 +145,7 @@ export default function DashboardPage() {
               variant="subtle"
               color="red"
               onClick={async () => {
-                console.log("[v0] Mock sign out");
-                // Simulate API delay
-                await new Promise((resolve) => setTimeout(resolve, 500));
+                signOut();
               }}
             >
               Sign Out

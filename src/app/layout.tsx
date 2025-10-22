@@ -1,13 +1,12 @@
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 // import Providers from "@/context/providers";
+import Providers from "@/context/providers";
 import {
   ColorSchemeScript,
-  mantineHtmlProps,
-  MantineProvider,
+  mantineHtmlProps
 } from "@mantine/core";
 import type { Metadata } from "next";
-import { Notifications } from "@mantine/notifications";
 
 export const metadata: Metadata = {
   title: "Digital Business Card",
@@ -28,11 +27,9 @@ export default function RootLayout({
         <ColorSchemeScript defaultColorScheme="dark" />
       </head>
       <body cz-shortcut-listen="true">
-        {/* <Providers>{children}</Providers> */}
-        <MantineProvider defaultColorScheme="dark">
-          <Notifications />
+        <Providers>
           {children}
-        </MantineProvider>
+        </Providers>
       </body>
     </html>
   );
