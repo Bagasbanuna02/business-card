@@ -2,8 +2,34 @@
 
 import { Button, Container, Paper, Stack, Text, Title } from "@mantine/core";
 import { IconBrandGoogle } from "@tabler/icons-react";
+import { getSession, signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const checkSession = async () => {
+        const session = await getSession();
+        if (session) {
+          router.push("/dashboard");
+        }
+      };
+
+      checkSession();
+    } catch (error) {
+      console.error("Error checking session:", error);
+    }
+  }, [router]);
+
+  const handleGoogleSignIn = () => {
+    setLoading(true);
+    signIn("google", { callbackUrl: "/dashboard" });
+  };
+
   return (
     <Container size="xs" py="xl">
       <Paper
@@ -36,6 +62,7 @@ export default function SignInPage() {
           </Stack>
 
           <Button
+            loading={loading}
             leftSection={<IconBrandGoogle size={20} />}
             variant="gradient"
             gradient={{ from: "#2AF598", to: "#009EFD", deg: 45 }}
@@ -43,7 +70,7 @@ export default function SignInPage() {
             fullWidth
             radius="xl"
             onClick={() => {
-              //   handleGoogleSignIn();
+              handleGoogleSignIn();
             }}
             style={{ boxShadow: "0 4px 14px rgba(0,158,253,0.25)" }}
           >
