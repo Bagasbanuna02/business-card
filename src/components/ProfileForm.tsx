@@ -29,6 +29,8 @@ interface ProfileFormProps {
 export function ProfileForm({ initialData, onSave }: ProfileFormProps) {
   const [loading, setLoading] = useState(false);
 
+  console.log("INITIAL", initialData);
+
   const form = useForm({
     initialValues: {
       name: initialData?.name || "",
@@ -67,13 +69,14 @@ export function ProfileForm({ initialData, onSave }: ProfileFormProps) {
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack gap="md">
+        {JSON.stringify(form.values, null, 2)}
         <Group>
-          <Avatar src={form.values.avatarUrl} size="lg" />
+          <Avatar src={form.values.avatarUrl || ""} size="lg" />
           <Stack gap="xs">
             <Text fw={500}>Profile Picture</Text>
             <TextInput
               placeholder="Avatar URL"
-              value={form.values.avatarUrl}
+              value={form.values.avatarUrl || ""}
               {...form.getInputProps("avatarUrl")}
             />
           </Stack>

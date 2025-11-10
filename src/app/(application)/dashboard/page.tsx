@@ -1,8 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { ProfileForm } from "@/components/ProfileForm";
+import ProfileForm2 from "@/components/ProfileForm2";
 import { QRCodeCard } from "@/components/QRCodeCard";
 import { SocialLinks } from "@/components/SocialLinks";
 import {
@@ -16,66 +18,111 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { IconEye, IconLogout } from "@tabler/icons-react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface Profile {
-  id: string;
-  name: string;
+  id?: string;
+  name?: string;
   bio?: string;
   avatarUrl?: string;
-  socials: Array<{
-    id: string;
-    type: string;
-    url: string;
-  }>;
+  // socials: Array<{
+  //   id: string;
+  //   type: string;
+  //   url: string;
+  // }>;
 }
 
 export default function DashboardPage() {
-  const { status } = useSession();
+  const { status, data } = useSession();
   const router = useRouter();
-  console.log("[STATUS SESSION]", status);
-
-  // useEffect(() => {
-  //   if (status === "unauthenticated") {
-  //     router.push("/auth/signin");
-  //   }
-  // }, [status]);
-
-  const mockSession = {
-    user: {
-      id: "mock-user-id",
-      name: "John Doe",
-      email: "john@example.com",
-    },
-  };
 
   const [profile, setProfile] = useState<Profile>({
-    id: "mock-profile-id",
-    name: "John Doe",
-    bio: "Full-stack developer passionate about creating amazing user experiences",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    socials: [
-      { id: "1", type: "github", url: "https://github.com/johndoe" },
-      { id: "2", type: "linkedin", url: "https://linkedin.com/in/johndoe" },
-      { id: "3", type: "twitter", url: "https://twitter.com/johndoe" },
-    ],
+    name: "",
+    bio: "",
+    avatarUrl: "",
   });
+  const [haveProfile, setHaveProfile] = useState(false);
+
+  useEffect(() => {
+    onLoadData();
+  }, [data?.user.id]);
+
+  const onLoadData = async () => {
+    const response = await fetch("/api/profile", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+
+    // console.log("[RES GET]", result);
+
+    if (response.status === 404) {
+      setProfile({
+        name: data?.user?.name || "",
+        bio: data?.user?.email || "",
+        avatarUrl:
+          data?.user?.image ||
+          "https://tamilnaducouncil.ac.in/wp-content/uploads/2020/04/dummy-avatar.jpg",
+      });
+
+      setHaveProfile(false);
+      return;
+    }
+
+    if (response.status === 200) {
+      setProfile({
+        id: result.data.id,
+        name: result.data.name,
+        bio: result.data.bio,
+        avatarUrl: result.data.avatarUrl,
+      });
+
+      setHaveProfile(true);
+      return;
+    }
+  };
 
   const handleProfileSave = async (data: {
     name: string;
     bio?: string;
     avatarUrl?: string;
   }) => {
-    console.log("[v0] Mock profile save:", data);
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Update local state with new data
-    setProfile((prev: any) => (prev ? { ...prev, ...data } : null));
+    if (!data.name || !data.bio || !data.avatarUrl) {
+      notifications.show({
+        title: "Error",
+        message: "Please fill all fields",
+        color: "red",
+      });
+      return;
+    }
+
+    const response = await fetch("/api/profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (response.status === 200) {
+      notifications.show({
+        title: "Success",
+        message: "Profile updated successfully",
+        color: "green",
+      });
+
+      setProfile((prev: any) => (prev ? { ...prev, ...data } : null));
+    }
   };
 
   const handleSocialAdd = async (data: { type: string; url: string }) => {
@@ -128,10 +175,11 @@ export default function DashboardPage() {
         <Group justify="space-between">
           <div>
             <Title order={1}>Dashboard</Title>
+            {/* {JSON.stringify(profile, null, 2)} */}
             <Text c="dimmed">Manage your digital business card</Text>
           </div>
           <Group>
-            {profile && (
+            {haveProfile && (
               <Button
                 leftSection={<IconEye size={16} />}
                 variant="outline"
@@ -161,26 +209,34 @@ export default function DashboardPage() {
                   <Title order={2} size="h3" mb="md">
                     Profile Information
                   </Title>
-                  <ProfileForm
-                    initialData={profile || undefined}
+                  <ProfileForm2
+                    setProfile={setProfile}
+                    profile={profile as any}
                     onSave={handleProfileSave}
                   />
+                  {/* <ProfileForm
+                    initialData={profile ? (profile as any) : undefined}
+                    onSave={handleProfileSave}
+                  /> */}
                 </div>
 
                 <Divider />
 
-                <SocialLinks
+                {/* <SocialLinks
                   socialLinks={profile?.socials || []}
                   onAdd={handleSocialAdd}
                   onDelete={handleSocialDelete}
-                />
+                /> */}
               </Stack>
             </Paper>
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, md: 4 }}>
-            {profile && profileUrl && (
-              <QRCodeCard profileUrl={profileUrl} profileName={profile.name} />
+            {haveProfile && profileUrl && (
+              <QRCodeCard
+                profileUrl={profileUrl}
+                profileName={profile?.name || ""}
+              />
             )}
           </Grid.Col>
         </Grid>
