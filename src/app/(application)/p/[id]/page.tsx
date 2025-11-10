@@ -19,6 +19,7 @@ import {
   IconExternalLink,
 } from "@tabler/icons-react";
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
 interface ProfilePageProps {
   params: {
@@ -78,15 +79,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <Container size="sm" py="xl">
-      <Paper shadow="lg" p="xl" radius="lg">
+      <Paper shadow="lg" p="xl" radius="lg" bg="dark.8">
         <Stack align="center" gap="xl">
           {/* Profile Header */}
           <Stack align="center" gap="md">
-            {/* <Avatar
-              src={profile.avatarUrl || profile.user.image}
-              size={120}
-              radius="xl"
-            /> */}
+            <Avatar src={profile.avatarUrl || ""} size={120} radius="xl" />
             <Stack align="center" gap="xs">
               <Title order={1} ta="center">
                 {profile.name}
@@ -136,6 +133,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             </Badge>
             <Text size="xs" c="dimmed">
               Create your own at Digital Business Card
+            </Text>
+            <Text size="xs" c="dimmed">
+              or click on <Link href="/">HERE</Link>
             </Text>
           </Stack>
         </Stack>

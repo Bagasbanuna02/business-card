@@ -7,10 +7,6 @@ export default withAuth(
     const token = req.nextauth.token;
     const { pathname } = req.nextUrl;
 
-    console.log("[TOKEN]", token);
-    console.log("[PATHNAME]", pathname);
-    // Add any additional middleware logic here
-
     if (token && pathname === "/") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
